@@ -1,0 +1,13 @@
+runtime: php55
+api_version: 1
+
+handlers:
+
+- url: /stylesheets
+  static_dir: stylesheets
+  
+- url: /paddlegame
+  script: index.html
+  
+- url: /
+  script: helloworld.php

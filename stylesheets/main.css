@@ -1,0 +1,19 @@
+.container {
+    width: 100%;
+    height: 100%;
+    background-color: #EEE;
+    top:0;
+    left:0;
+    overflow:hidden; 
+}
+
+
+.paddle {
+    border-radius: 25px;
+    background: #73AD21;
+    width: 18%;
+    height: 4%; 
+	position: absolute;
+	bottom: 1%;
+	left: 41%;
+}
