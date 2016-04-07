@@ -1,8 +1,9 @@
-var delay = 20;
+var delay = 15;
 var space = false;
 var screenWidth = 100;
 var screenHeight = 100;
 var ballDirectionThreshold = 8;
+var defaultCircleBottom = 5;
 
 function init() {
 	initValues();
@@ -18,7 +19,7 @@ function initValues() {
 
 	var circle = document.getElementById('circle');
 	circle.style.left = '49%';
-	circle.style.bottom = '5%';
+	circle.style.bottom = defaultCircleBottom + '%';
 	circle.style.width = '2.5%';
 	circle.style.height = '5%';
 }
@@ -34,9 +35,9 @@ function onKeyDown(e) {
 	case 39: // Left Key
 	{
 		if (left < (screenWidth - parseFloat(paddle.style.width))) {
-			paddle.style.left = (left + 1) + '%';
+			paddle.style.left = (left + 0.5) + '%';
 			if (space == false) {
-				circle.style.left = (circleLeft + 1) + '%';
+				circle.style.left = (circleLeft + 0.5) + '%';
 			}
 
 		}
@@ -45,9 +46,9 @@ function onKeyDown(e) {
 	case 37: // Right Key
 	{
 		if (left > 0) {
-			paddle.style.left = (left - 1) + '%';
+			paddle.style.left = (left - 0.5) + '%';
 			if (space == false) {
-				circle.style.left = (circleLeft - 1) + '%';
+				circle.style.left = (circleLeft - 0.5) + '%';
 			}
 		}
 		break;
@@ -93,6 +94,8 @@ function onKeyDown(e) {
 				// If the ball touches the paddle stop bouncing the ball
 				if (circleBottom > newThreshold) {
 					bounceBallToPaddle();
+				} else {
+					fadeOutBall(circle, paddle);
 				}
 			}, delay);
 		}
@@ -107,7 +110,8 @@ function onKeyDown(e) {
 
 			setTimeout(
 					function() {
-						// bounce the ball downwards if it reaches the top of the screen
+						// bounce the ball downwards if it reaches the top of
+						// the screen
 						if (circleLeft <= (screenWidth - parseFloat(circle.style.width))) {
 							bounceBallDownwards();
 						}
@@ -132,7 +136,8 @@ function onKeyDown(e) {
 						if (circleBottom < (screenHeight - parseFloat(circle.style.height))) {
 							retreatBallUpwards();
 						}
-						// bounce the ball downwards if it reaches the top of the screen
+						// bounce the ball downwards if it reaches the top of
+						// the screen
 						else if (circleBottom > newThreshold) {
 							bounceBallDownwards();
 						}
@@ -148,7 +153,8 @@ function onKeyDown(e) {
 			circle.style.bottom = circleBottom + '%';
 
 			setTimeout(function() {
-				// bounce the ball right side if the ball is in the RHS of the paddle
+				// bounce the ball right side if the ball is in the RHS of the
+				// paddle
 				if (circleLeft >= 0) {
 					bounceBallRight();
 				}
@@ -172,6 +178,8 @@ function onKeyDown(e) {
 				// If the ball touches the paddle stop bouncing
 				if (circleBottom > newThreshold) {
 					retreatBallVertically();
+				} else {
+					fadeOutBall(circle, paddle);
 				}
 			}, delay);
 
@@ -186,7 +194,8 @@ function onKeyDown(e) {
 
 			setTimeout(
 					function() {
-						// If the ball reaches the top of the screen, bounce it downwards
+						// If the ball reaches the top of the screen, bounce it
+						// downwards
 						if (circleBottom < (screenHeight - parseFloat(circle.style.height))) {
 							moveBallVertically();
 						}
@@ -212,6 +221,8 @@ function onKeyDown(e) {
 				// If the ball touches the paddle stop bouncing
 				if (circleBottom > newThreshold) {
 					bounceBallToPaddle();
+				} else {
+					fadeOutBall(circle, paddle);
 				}
 			}, delay);
 		}
@@ -251,7 +262,8 @@ function onKeyDown(e) {
 						if (circleBottom < (screenHeight - parseFloat(circle.style.height))) {
 							retreatBallUpwards();
 						}
-						// If the ball hits top of the screen bounce it downwards
+						// If the ball hits top of the screen bounce it
+						// downwards
 						else if (circleBottom > newThreshold) {
 							bounceBallDownwards();
 						}
@@ -268,11 +280,13 @@ function onKeyDown(e) {
 
 			setTimeout(
 					function() {
-						// bounce the ball left side if the ball is in the LHS of the paddle
+						// bounce the ball left side if the ball is in the LHS
+						// of the paddle
 						if (circleLeft <= (screenWidth - parseFloat(circle.style.width))) {
 							bounceBallLeft();
 						}
-						// If the ball hits the sides of the screen bouce it upwards
+						// If the ball hits the sides of the screen bouce it
+						// upwards
 						else if (circleLeft > (screenWidth - parseFloat(circle.style.width))) {
 							retreatBallUpwards();
 						}
@@ -280,4 +294,18 @@ function onKeyDown(e) {
 		};
 		bounceBallLeft();
 	}
+}
+
+function fadeOutBall(circle, paddle) {
+	if (parseFloat(circle.style.bottom) == defaultCircleBottom) {
+		circleLeft = parseFloat(circle.style.left);
+		paddleLeft = parseFloat(paddle.style.left);
+
+		paddleWidth = parseFloat(paddle.style.width);
+		circleWidth = parseFloat(circle.style.width);
+
+		if (!(((circleLeft + circleWidth) >= paddleLeft) && ((circleLeft +  circleWidth) < (paddleLeft + paddleWidth))))
+			circle.style.display = 'none';
+	}
+
 }
