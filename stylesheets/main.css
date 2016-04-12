@@ -1,3 +1,6 @@
+html,body{
+	height:100%; 
+}
 .container {
     width: 100%;
     height: 100%;
@@ -5,6 +8,20 @@
     top:0;
     left:0;
     overflow:hidden; 
+}
+
+.bricks{
+	width : 100%;
+	height : 100%;
+	overflow: hidden
+}
+
+.brick{
+    width:8%;
+    height:8.7%;
+    background: #6DB3F2 url('/images/red-brick-wall.jpg');    
+    border: 2px solid #76765f;
+    float : left;
 }
 
 
