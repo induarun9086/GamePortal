@@ -1,9 +1,14 @@
-var delay = 15;
+var delay = 20;
 var space = false;
 var screenWidth = 100;
 var screenHeight = 100;
 var ballDirectionThreshold = 8;
 var defaultCircleBottom = 5;
+var score = 0;
+var brokenBricks = 0;
+var livesLeft = 3;
+var left;
+var circleLeft;
 
 function init() {
 	initValues();
@@ -23,6 +28,8 @@ function initValues() {
 	circle.style.bottom = defaultCircleBottom + '%';
 	circle.style.width = '2.5%';
 	circle.style.height = '5%';
+	circleLeft = circle.style.left;
+	
 }
 
 function initBricks() {
@@ -34,21 +41,10 @@ function initBricks() {
 			divBlock.className = "brick";
 			divBlock.id = "brick" + i + j;
 			bricks.appendChild(divBlock);
-
-			// temp code to be Removed
-
-			divBlock.addEventListener("click", function() {
-				alert(this.offsetLeft + ' '
-						+ (this.offsetLeft + this.clientWidth) + ' '
-						+ this.offsetTop + ' '
-						+ (this.offsetTop + this.clientHeight));
-			}, false);
 		}
 	}
 }
 
-var left;
-var circleLeft;
 
 function onKeyDown(e) {
 
@@ -145,13 +141,17 @@ function bounceBallRightward() {
 				function() {
 					// bounce the ball downwards if it reaches the top of
 					// the screen
-					if (circleLeft <= (screenWidth - parseFloat(circle.style.width))) {
+					if ((circleLeft <= (screenWidth - parseFloat(circle.style.width)))
+							&& (circleBottom > newThreshold)) {
 						bounceBallDownwards();
 					}
 					// bounce the ball to the paddle if it hits the screen
 					else if (circleLeft > (screenWidth - parseFloat(circle.style.width))) {
 						bounceBallToPaddle();
+					} else {
+						fadeOutBall(circle, paddle);
 					}
+
 				}, delay);
 	}
 
@@ -163,15 +163,19 @@ function bounceBallRightward() {
 		circleBottom = (circleBottom + Math.sin((Math.PI) / 4));
 		circle.style.bottom = circleBottom + '%';
 
+		var brickRemoved = removeBrickIfCollided(circle, 'right');
+
 		setTimeout(
 				function() {
+
 					// bounce the ball upwards if it hits the screen
-					if (circleBottom < (screenHeight - parseFloat(circle.style.height))) {
+					if (!brickRemoved
+							&& (circleBottom < (screenHeight - parseFloat(circle.style.height)))) {
 						retreatBallUpwards();
 					}
 					// bounce the ball downwards if it reaches the top of
 					// the screen
-					else if (circleBottom > newThreshold) {
+					else if ((circleBottom > newThreshold)) {
 						bounceBallDownwards();
 					}
 				}, delay);
@@ -184,8 +188,6 @@ function bounceBallRightward() {
 
 		circleBottom = (circleBottom + Math.sin(Math.PI / 4));
 		circle.style.bottom = circleBottom + '%';
-		
-		removeBrickIfCollided(circle);
 
 		setTimeout(function() {
 			// bounce the ball right side if the ball is in the RHS of the
@@ -208,10 +210,10 @@ function bounceBallVertically() {
 	var newThreshold = parseFloat(circle.style.height);
 
 	var retreatBallVertically = function() {
+
 		circle.style.left = (circleLeft - Math.cos(Math.PI / 2)) + '%';
 		circleBottom = (circleBottom - Math.sin(Math.PI / 2));
 		circle.style.bottom = circleBottom + '%';
-		
 
 		setTimeout(function() {
 			// If the ball touches the paddle stop bouncing
@@ -230,14 +232,15 @@ function bounceBallVertically() {
 		circle.style.left = (circleLeft - Math.cos(Math.PI / 2)) + '%';
 		circleBottom = (circleBottom + Math.sin(Math.PI / 2));
 		circle.style.bottom = circleBottom + '%';
-		
-		var brickRemoved = removeBrickIfCollided(circle);
-		
+
+		var brickRemoved = removeBrickIfCollided(circle, 'vertical');
+
 		setTimeout(
 				function() {
 					// If the ball reaches the top of the screen, bounce it
 					// downwards
-					if (circleBottom < (screenHeight - parseFloat(circle.style.height))) {
+					if (!brickRemoved
+							&& (circleBottom < (screenHeight - parseFloat(circle.style.height)))) {
 						moveBallVertically();
 					}
 					// If the ball touches the paddle stop bouncing
@@ -282,14 +285,17 @@ function bounceBallLeftward() {
 
 		setTimeout(function() {
 			// If the ball reaches the top of the screen bounce downwards
-			if (circleLeft >= 0) {
+			if (circleLeft >= 0 && (circleBottom > newThreshold)) {
 				bounceBallDownwards();
 			}
 			// If the ball reaches the hits the side of the screen
 			// bounce to the paddle
 			else if (circleLeft < 0) {
 				bounceBallToPaddle();
+			} else {
+				fadeOutBall(circle, paddle);
 			}
+
 		}, delay);
 	}
 
@@ -301,12 +307,13 @@ function bounceBallLeftward() {
 		circleBottom = (circleBottom + Math.sin((Math.PI) / 4));
 		circle.style.bottom = circleBottom + '%';
 
-		removeBrickIfCollided(circle);
+		var brickRemoved = removeBrickIfCollided(circle, 'left');
 
 		setTimeout(
 				function() {
 					// If the ball touches the sides bounce it upwards
-					if (circleBottom < (screenHeight - parseFloat(circle.style.height))) {
+					if (!brickRemoved
+							&& (circleBottom < (screenHeight - parseFloat(circle.style.height)))) {
 						retreatBallUpwards();
 					}
 					// If the ball hits top of the screen bounce it
@@ -324,8 +331,6 @@ function bounceBallLeftward() {
 
 		circleBottom = (circleBottom + Math.sin(Math.PI / 4));
 		circle.style.bottom = circleBottom + '%';
-		
-		removeBrickIfCollided(circle);
 
 		setTimeout(
 				function() {
@@ -355,6 +360,14 @@ function fadeOutBall(circle, paddle) {
 		if (!(((circleLeft + circleWidth) >= paddleLeft) && ((circleLeft + circleWidth) < (paddleLeft + paddleWidth)))) {
 			circle.style.display = 'none';
 			space = false;
+			var lives = document.getElementById('lives');
+			livesLeft = livesLeft - 1;
+			lives.innerHTML = 'Lives : ' + livesLeft;
+			if (livesLeft == 0) {
+				alert('Game Over');
+			}
+			initValues();
+			circle.style.display = 'block';
 		}
 
 		else {
@@ -381,23 +394,62 @@ function getPosition(element) {
 
 }
 
-function removeBrickIfCollided(ball) {
+function removeBrickIfCollided(ball, direction) {
 	var brickRemoved = false;
 	var parent = document.getElementById('bricks');
 	var bricks = parent.childNodes;
 	var ballPosition = getPosition(ball);
-	
+	var totalNumOfBricks = 0;
+
+	var scoreboard = document.getElementById('scoreboard');
+	var noofbricks = document.getElementById('noofbricks');
+
 	for (var i = 0; i < bricks.length; i++) {
 		var brick = bricks[i];
 		var brickPosition = getPosition(brick);
-		if (ballPosition.right > brickPosition.left
-				&& ballPosition.left < brickPosition.right
-				&& ballPosition.bottom > brickPosition.top
-				&& ballPosition.top < brickPosition.bottom) {
-			console.log('removed child : ' + brick.id);
-			brick.style.visibility = 'hidden';
-			brickRemoved = true;
+		if (brick.style.visibility === 'hidden') {
+			return brickRemoved;
 		}
+		if (direction === 'vertical') {
+			if (ballPosition.right > brickPosition.left
+					&& ballPosition.left < brickPosition.right
+					&& ballPosition.top < brickPosition.bottom) {
+
+				console.log('removed child : ' + brick.id);
+				brick.style.visibility = 'hidden';
+				brickRemoved = true;
+				score = score + 10;
+				scoreboard.innerHTML = 'Score : ' + score;
+				brokenBricks = brokenBricks + 1;
+				noofbricks.innerHTML = 'Number of Bricks hit : ' + brokenBricks;
+
+			}
+		} else if (direction === 'right') {
+			if (ballPosition.right > brickPosition.left
+					&& ballPosition.top < brickPosition.bottom) {
+				console.log('removed child : ' + brick.id);
+				brick.style.visibility = 'hidden';
+				brickRemoved = true;
+				score = score + 10;
+				scoreboard.innerHTML = 'Score : ' + score;
+				brokenBricks = brokenBricks + 1;
+				noofbricks.innerHTML = 'Number of Bricks hit : ' + brokenBricks;
+			}
+		} else if (direction === 'left') {
+			if (ballPosition.left < brickPosition.right
+					&& ballPosition.bottom < brickPosition.top) {
+
+				console.log('removed child : ' + brick.id);
+				brick.style.visibility = 'hidden';
+				brickRemoved = true;
+				score = score + 10;
+				scoreboard.innerHTML = 'Score : ' + score;
+				brokenBricks = brokenBricks + 1;
+				noofbricks.innerHTML = 'Number of Bricks hit : ' + brokenBricks;
+			}
+		}
+		totalNumOfBricks = i;
 	}
+	console.log(totalNumOfBricks);
 	return brickRemoved;
 }

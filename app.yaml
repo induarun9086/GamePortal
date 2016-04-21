@@ -15,5 +15,8 @@ handlers:
 - url: /paddlegame
   script: index.html
   
+- url: /tetris
+  script: tetris.html
+  
 - url: /
   script: helloworld.php

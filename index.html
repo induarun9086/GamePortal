@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<title>Paddle And Brick Game</title>
-	<link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
-    <script type="text/javascript" src="/js/main.js" ></script>
+<meta charset="UTF-8">
+<title>Paddle And Brick Game</title>
+<link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+<script type="text/javascript" src="/js/main.js"></script>
 </head>
-<body onload = "init()">
-	<div id = "container" class = "container">
-		<div id = "paddle" class="paddle"></div>
-		<div id = "circle" class ="circle"></div>
-		<div id = "bricks" style = "height:50%"></div>
+<body onload="init()">
+	<div id="container" class="container">
+		<div id="header" class="header">
+			<div id="scoreboard" class="scoreboard">score :</div>
+			<div id="noofbricks" class="scoreboard">Number of Bricks hit :</div>
+			<div id="lives" class="scoreboard">Lives : 3 </div>
+		</div>
+		<div id="paddle" class="paddle"></div>
+		<div id="circle" class="circle"></div>
+		<div id="bricks" style="height: 50%"></div>
 	</div>
 </body>
 </html>
