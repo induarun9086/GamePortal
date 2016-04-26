@@ -1,0 +1,23 @@
+html,body{
+	height:100%; 
+}
+
+.container {
+	margin : 0 auto;
+	position: relative;
+	width: 40%;
+	height: 92%;
+	background: #fff;
+	border: 2px solid green;
+}
+
+.block{
+	font-size: 10px;
+	line-height: 1em;
+	position: absolute;
+	width: 4%;
+	height:	4%;
+	border:	0.5px solid #ffffff;
+	background: #CC54C4;
+	left : 50%;
+}
