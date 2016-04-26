@@ -28,7 +28,7 @@ function initValues() {
 	circle.style.bottom = defaultCircleBottom + '%';
 	circle.style.width = '2.5%';
 	circle.style.height = '5%';
-	circleLeft = circle.style.left;
+	circleLeft = parseFloat(circle.style.left);
 	
 }
 
@@ -52,7 +52,6 @@ function onKeyDown(e) {
 	left = parseFloat(paddle.style.left);
 
 	var circle = document.getElementById('circle');
-	var circleLeft = parseFloat(circle.style.left);
 	var circleHeight = parseFloat(circle.style.height);
 
 	switch (e.keyCode) {
