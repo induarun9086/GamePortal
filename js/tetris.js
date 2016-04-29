@@ -5,17 +5,20 @@ var totalWidth = 100;
 var totalHeight = 92;
 
 function initPuzzle() {
-	var puzzle = new Puzzle();
-	document.addEventListener("keydown", function(e) {
-		onKeyDown(e, puzzle);
-	}, false);
-	puzzle.createPuzzle();
+	var board = new PuzzleBoard();
+	createNewPuzzle(board);
 }
 
-function Puzzle() {
+function PuzzleBoard() {
+	this.filledBlocks = createEmptyArray(totalWidth / blockWidth, totalHeight
+			/ blockHeight);
+}
+
+function Puzzle(board) {
 	var that = this;
+	this.puzzleBoard = board;
 	this.colors = [ '#32a4fa', '#38C44F', '#FFAC1C', '#FF6600', '#CC54C4',
-			'999', '#FF0000' ];
+			'#999', '#FF0000' ];
 	this.puzzles = [ [ [ 0, 0, 1 ], [ 1, 1, 1 ], [ 0, 0, 0 ] ],
 			[ [ 1, 0, 0 ], [ 1, 1, 1 ], [ 0, 0, 0 ] ],
 			[ [ 0, 1, 1 ], [ 1, 1, 0 ], [ 0, 0, 0 ] ],
@@ -23,10 +26,8 @@ function Puzzle() {
 			[ [ 0, 1, 0 ], [ 1, 1, 1 ], [ 0, 0, 0 ] ], [ [ 1, 1 ], [ 1, 1 ] ],
 			[ [ 1, 1, 1, 1 ], [ 0, 0, 0, 0 ] ] ];
 
-	this.filledBlocks = createEmptyArray(totalWidth / blockWidth, totalHeight
-			/ blockHeight);
-
 	this.elements = [];
+	this.previousPosition = [];
 
 	this.createPuzzle = function(puzzle) {
 		var puzzleType = random(this.puzzles.length);
@@ -48,83 +49,121 @@ function Puzzle() {
 			}
 		}
 
-		var previousPosition = [];
-
-		setInterval(function() {
-			that.moveDown(previousPosition);
+		var id = setInterval(function() {
+			that.moveDown(id);
 		}, 500);
 	}
 
-	this.moveDown = function(previousPosition) {
-		
-		for (var i = 0; i < previousPosition.length; i++) {
-			x = previousPosition[i][0];
-			y = previousPosition[i][1];
-			console.log(that.filledBlocks[x][y]);
-			that.filledBlocks[x][y] = 0;
+	this.moveDown = function(id) {
+		var moveBlock = this.mayMove();
+		if (moveBlock) {
+			for (var i = 0; i < that.elements.length; i++) {
+				var block = that.elements[i];
+				var blockTop = parseFloat(block.style.top);
+
+				that.updatePuzzleBoard(block, i);
+
+				if (blockTop <= 92) {
+					block.style.top = (blockTop + blockHeight) + '%';
+				} else {
+					clearInterval(id);
+				}
+			}
+
 		}
-		
+
+		that.clearPreviousPositions();
+
+	}
+
+	this.moveRight = function() {
+		that.clearPreviousPositions();
 		for (var i = 0; i < that.elements.length; i++) {
-			var block = that.elements[i];
+			var block = this.elements[i];
+			var blockLeft = parseFloat(block.style.left);
+
+			if (blockLeft <= 100) {
+				block.style.left = (blockLeft + blockWidth) + '%';
+			}
+
+			that.updatePuzzleBoard(block, i);
+
+		}
+	}
+
+	this.moveLeft = function() {
+		that.clearPreviousPositions();
+		for (var i = 0; i < that.elements.length; i++) {
+			var block = this.elements[i];
+			var blockLeft = parseFloat(block.style.left);
+
+			if (blockLeft >= 0) {
+				block.style.left = (blockLeft - blockWidth) + '%';
+			}
+			that.updatePuzzleBoard(block, i);
+		}
+	}
+
+	this.clearPreviousPositions = function() {
+		for (var i = 0; i < that.previousPosition.length; i++) {
+			x = that.previousPosition[i][0];
+			y = that.previousPosition[i][1];
+			that.puzzleBoard.filledBlocks[x][y] = 0;
+		}
+	}
+
+	this.mayMove = function() {
+
+		for (var i = 0; i < that.elements.length; i++) {
+			var block = this.elements[i];
 			var blockLeft = parseFloat(block.style.left);
 			var blockTop = parseFloat(block.style.top);
 
 			x = blockLeft / 4;
 			y = blockTop / 4;
 
-			that.filledBlocks[x][y] = block;
-
-			if (blockTop <= 92) {
-				block.style.top = (blockTop + blockHeight) + '%';
+			if (that.puzzleBoard.filledBlocks[x + 1][y + 1] != 0) {
+				return false;
 			}
 
-			previousPosition[i] = [ x, y ];
 		}
+
+		return true;
+
 	}
 
-}
+	this.updatePuzzleBoard = function(block, i) {
+		var blockLeft = parseFloat(block.style.left);
+		var blockTop = parseFloat(block.style.top);
 
-function random(i) {
-	return Math.floor(Math.random() * i);
-}
+		var x = blockLeft / 4;
+		var y = blockTop / 4;
 
-function createEmptyArray(y, x) {
-	var array = [];
-	for (var y2 = 0; y2 < y; y2++) {
-		array.push(new Array());
-		for (var x2 = 0; x2 < x; x2++) {
-			array[y2].push(0);
-		}
+		that.puzzleBoard.filledBlocks[x][y] = block;
+		that.previousPosition[i] = [ x, y ];
 	}
-	return array;
+}
+
+function createNewPuzzle(board) {
+	var puzzle = new Puzzle(board);
+	document.addEventListener("keydown", function(e) {
+		onKeyDown(e, puzzle);
+	}, false);
+	puzzle.createPuzzle();
 }
 
 function onKeyDown(e, puzzle) {
 	switch (e.keyCode) {
 	case 39: // Right Key
 	{
-		for (var i = 0; i < puzzle.elements.length; i++) {
-			var block = puzzle.elements[i];
-			var blockLeft = parseFloat(block.style.left);
-
-			if (blockLeft <= 100) {
-				block.style.left = (blockLeft + blockWidth) + '%';
-			}
-		}
-
+		puzzle.moveRight();
 		break;
 	}
 
 	case 37: // Left Key
 	{
-		for (var i = 0; i < puzzle.elements.length; i++) {
-			var block = puzzle.elements[i];
-			var blockLeft = parseFloat(block.style.left);
-
-			if (blockLeft >= 0) {
-				block.style.left = (blockLeft - blockWidth) + '%';
-			}
-		}
+		puzzle.moveLeft();
+		break;
 	}
 
 	}
