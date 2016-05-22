@@ -79,6 +79,7 @@ function moveDown(game) {
 
 		if (isCurrentObjectIntersecting(currentObject, block) && blockTop <= 92) {
 			block.style.top = (blockTop + blockHeight) + '%';
+			removeFullLine();
 		} else {
 			game.currentState = curr_state_initial;
 		}
@@ -96,12 +97,32 @@ function isCurrentObjectIntersecting(currentObject, block) {
 	var y = blockTop / 4;
 
 	if (filledBlocks[x][y + 1] != 0
-			&& !isInArray(filledBlocks[x][y + 1],currentObject)) {
+			&& !isInArray(filledBlocks[x][y + 1], currentObject)) {
 		return false;
 	}
-	
-	return true;
 
+	return true;
+}
+
+function removeFullLine() {
+	var removeLine = false;
+	var parent = document.getElementById('tetris-area');
+	for (var y = filledBlocks.length - 1; y > 0; y--) {
+		for (var x = 0; x < filledBlocks.length; x++) {
+			if (filledBlocks[x][y] == 0) {
+				break;
+			}
+			if(x == filledBlocks.length - 1)
+			removeLine = true;
+		}
+		if (removeLine) {
+			for (var x = 0; x < filledBlocks.length; x++) {
+				var block = filledBlocks[x][y];
+				parent.removeChild(block);
+				filledBlocks[x][y] == 0;
+			}
+		}
+	}
 }
 
 function updatePuzzleBoard(game, block, i) {
@@ -140,7 +161,6 @@ function onKeyDown(e, game) {
 		moveLeft(game);
 		break;
 	}
-
 	}
 }
 
