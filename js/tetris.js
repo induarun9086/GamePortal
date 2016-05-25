@@ -1,5 +1,6 @@
 var colors = [ '#32a4fa', '#38C44F', '#FFAC1C', '#FF6600', '#CC54C4', '#999',
 		'#FF0000' ];
+
 var puzzles = [ [ [ 0, 0, 1 ], [ 1, 1, 1 ], [ 0, 0, 0 ] ],
 		[ [ 1, 0, 0 ], [ 1, 1, 1 ], [ 0, 0, 0 ] ],
 		[ [ 0, 1, 1 ], [ 1, 1, 0 ], [ 0, 0, 0 ] ],
@@ -72,14 +73,19 @@ function createNewPuzzle() {
 
 function moveDown(game) {
 	var currentObject = game.currentObject;
-
+	if (isBottomBoundary(currentObject)) {
+		game.currentState = curr_state_initial;
+		return;
+	}
 	for (var i = 0; i < currentObject.length; i++) {
 		var block = currentObject[i];
 		var blockTop = parseFloat(block.style.top);
 
-		if (isCurrentObjectIntersecting(currentObject, block) && blockTop <= 92) {
+		if (isCurrentObjectIntersecting(currentObject, block, 'down')
+				&& blockTop <= 96) {
 			block.style.top = (blockTop + blockHeight) + '%';
 			removeFullLine();
+
 		} else {
 			game.currentState = curr_state_initial;
 		}
@@ -88,7 +94,7 @@ function moveDown(game) {
 
 }
 
-function isCurrentObjectIntersecting(currentObject, block) {
+function isCurrentObjectIntersecting(currentObject, block, direction) {
 
 	var blockLeft = parseFloat(block.style.left);
 	var blockTop = parseFloat(block.style.top);
@@ -96,12 +102,44 @@ function isCurrentObjectIntersecting(currentObject, block) {
 	var x = blockLeft / 4;
 	var y = blockTop / 4;
 
-	if (filledBlocks[x][y + 1] != 0
-			&& !isInArray(filledBlocks[x][y + 1], currentObject)) {
+	var element = filledBlocks[x][y];
+
+	switch (direction) {
+	case ('down'):
+		element = filledBlocks[x][y + 1];
+		break;
+
+	case ('left'):
+		element = filledBlocks[x - 1][y];
+		break;
+
+	case ('right'):
+		element = filledBlocks[x + 1][y];
+		break;
+	}
+
+	if (element != 0 && !isInArray(element, currentObject)) {
 		return false;
 	}
 
 	return true;
+}
+
+function isBottomBoundary(currentObject) {
+
+	for (var i = 0; i < currentObject.length; i++) {
+		var block = currentObject[i];
+		var blockLeft = parseFloat(block.style.left);
+		var blockTop = parseFloat(block.style.top);
+
+		var x = blockLeft / 4;
+		var y = blockTop / 4;
+
+		if (blockTop >= 96) {
+			return true;
+		}
+	}
+	return false;
 }
 
 function removeFullLine() {
@@ -112,8 +150,8 @@ function removeFullLine() {
 			if (filledBlocks[x][y] == 0) {
 				break;
 			}
-			if(x == filledBlocks.length - 1)
-			removeLine = true;
+			if (x == filledBlocks.length - 1)
+				removeLine = true;
 		}
 		if (removeLine) {
 			for (var x = 0; x < filledBlocks.length; x++) {
@@ -170,7 +208,8 @@ function moveRight(game) {
 		var block = currentObject[i];
 		var blockLeft = parseFloat(block.style.left);
 
-		if (blockLeft <= 100) {
+		if (isCurrentObjectIntersecting(currentObject, block, 'right')
+				&& blockLeft >= 0) {
 			block.style.left = (blockLeft + blockWidth) + '%';
 		}
 
@@ -184,7 +223,8 @@ function moveLeft(game) {
 		var block = currentObject[i];
 		var blockLeft = parseFloat(block.style.left);
 
-		if (blockLeft >= 0) {
+		if (isCurrentObjectIntersecting(currentObject, block, 'left')
+				&& blockLeft <= 98) {
 			block.style.left = (blockLeft - blockWidth) + '%';
 		}
 
