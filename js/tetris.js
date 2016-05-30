@@ -73,6 +73,10 @@ function createNewPuzzle() {
 
 function moveDown(game) {
 	var currentObject = game.currentObject;
+	if (!mayMoveDown(currentObject)) {
+		game.currentState = curr_state_initial;
+		return;
+	}
 	if (isBottomBoundary(currentObject)) {
 		game.currentState = curr_state_initial;
 		return;
@@ -140,6 +144,26 @@ function isBottomBoundary(currentObject) {
 		}
 	}
 	return false;
+}
+
+function mayMoveDown(currentObject) {
+	for (var i = 0; i < currentObject.length; i++) {
+		var block = currentObject[i];
+		var blockLeft = parseFloat(block.style.left);
+		var blockTop = parseFloat(block.style.top);
+
+		var x = blockLeft / 4;
+		var y = blockTop / 4;
+
+		element = filledBlocks[x][y + 1];
+
+		if (element == 0 || isInArray(element, currentObject)) {
+			continue;
+		} else {
+			return false;
+		}
+	}
+	return true;
 }
 
 function removeFullLine() {
