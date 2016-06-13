@@ -141,13 +141,22 @@ function isBottomBoundary(currentObject) {
 
 	for (var i = 0; i < currentObject.length; i++) {
 		var block = currentObject[i];
-		var blockLeft = parseFloat(block.style.left);
 		var blockTop = parseFloat(block.style.top);
 
-		var x = blockLeft / 4;
-		var y = blockTop / 4;
-
 		if (blockTop >= 96) {
+			return true;
+		}
+	}
+	return false;
+}
+
+function isRightBoundary(currentObject) {
+
+	for (var i = 0; i < currentObject.length; i++) {
+		var block = currentObject[i];
+		var blockLeft = parseFloat(block.style.left);
+
+		if (blockLeft >= 96) {
 			return true;
 		}
 	}
@@ -236,12 +245,17 @@ function onKeyDown(e, game) {
 
 function moveRight(game) {
 	var currentObject = game.currentObject;
+	
+	if (isRightBoundary(currentObject)) {
+		return;
+	}
+	
 	for (var i = 0; i < currentObject.length; i++) {
 		var block = currentObject[i];
 		var blockLeft = parseFloat(block.style.left);
 
 		if (isCurrentObjectIntersecting(currentObject, block, 'right')
-				&& blockLeft >= 0) {
+				&& blockLeft <= 96) {
 			block.style.left = (blockLeft + blockWidth) + '%';
 		}
 
@@ -256,7 +270,7 @@ function moveLeft(game) {
 		var blockLeft = parseFloat(block.style.left);
 
 		if (isCurrentObjectIntersecting(currentObject, block, 'left')
-				&& blockLeft <= 98) {
+				&& blockLeft >= 0 ) {
 			block.style.left = (blockLeft - blockWidth) + '%';
 		}
 
