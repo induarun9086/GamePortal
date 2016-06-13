@@ -68,6 +68,14 @@ function createNewPuzzle() {
 			}
 		}
 	}
+	elements = sortElements(elements);
+	return elements;
+}
+
+function sortElements(elements) {
+	elements = elements.sort(function(a, b) {
+		return parseFloat(b.style.top) - parseFloat(a.style.top);
+	});
 	return elements;
 }
 
