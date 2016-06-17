@@ -5,8 +5,9 @@ var puzzles = [ [ [ 0, 0, 1 ], [ 1, 1, 1 ], [ 0, 0, 0 ] ],
 		[ [ 1, 0, 0 ], [ 1, 1, 1 ], [ 0, 0, 0 ] ],
 		[ [ 0, 1, 1 ], [ 1, 1, 0 ], [ 0, 0, 0 ] ],
 		[ [ 1, 1, 0 ], [ 0, 1, 1 ], [ 0, 0, 0 ] ],
-		[ [ 0, 1, 0 ], [ 1, 1, 1 ], [ 0, 0, 0 ] ], [ [ 1, 1 ], [ 1, 1 ] ],
-		[ [ 1, 1, 1, 1 ], [ 0, 0, 0, 0 ] ] ];
+		[ [ 0, 1, 0 ], [ 1, 1, 1 ], [ 0, 0, 0 ] ], 
+		[ [ 1, 1 ], [ 1, 1 ] ],
+		[ [ 0, 0, 0, 0 ], [ 1, 1, 1, 1 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ] ] ];
 
 var curr_state_initial = 1;
 var curr_state_moving = 2;
@@ -29,8 +30,9 @@ function initPuzzle() {
 	}, false);
 
 	setInterval(function() {
+
 		if (game.currentState == curr_state_initial) {
-			game.currentObject = createNewPuzzle();
+			createNewPuzzle(game);
 			game.currentState = curr_state_moving;
 			game.previousPositions = [];
 		} else if (game.currentState == curr_state_moving) {
@@ -43,11 +45,13 @@ function TetrisGame() {
 	this.currentState = curr_state_initial;
 	this.currentObject = null;
 	this.previousPositions = [];
+	this.currentPuzzle = [];
 }
 
-function createNewPuzzle() {
+function createNewPuzzle(game) {
 
-	var puzzleType = random(this.puzzles.length);
+	// var puzzleType = random(this.puzzles.length);
+	var puzzleType = 6;
 	var puzzle = puzzles[puzzleType];
 	var background = colors[random(this.colors.length)];
 
@@ -64,12 +68,14 @@ function createNewPuzzle() {
 				el.style.background = background;
 				document.getElementById("tetris-area").appendChild(el);
 				elements.push(el);
+				puzzle[y][x] = el;
 				puzzleNumber = puzzleNumber + 1;
 			}
 		}
 	}
 	elements = sortElements(elements);
-	return elements;
+	game.currentObject = elements;
+	game.currentPuzzle = puzzle;
 }
 
 function sortElements(elements) {
@@ -240,16 +246,21 @@ function onKeyDown(e, game) {
 		moveLeft(game);
 		break;
 	}
+	case 38: // Up arrow
+	{
+		rotate(game);
+		break;
+	}
 	}
 }
 
 function moveRight(game) {
 	var currentObject = game.currentObject;
-	
+
 	if (isRightBoundary(currentObject)) {
 		return;
 	}
-	
+
 	for (var i = 0; i < currentObject.length; i++) {
 		var block = currentObject[i];
 		var blockLeft = parseFloat(block.style.left);
@@ -270,10 +281,32 @@ function moveLeft(game) {
 		var blockLeft = parseFloat(block.style.left);
 
 		if (isCurrentObjectIntersecting(currentObject, block, 'left')
-				&& blockLeft >= 0 ) {
+				&& blockLeft >= 0) {
 			block.style.left = (blockLeft - blockWidth) + '%';
 		}
 
 		updatePuzzleBoard(game, block, i);
 	}
+}
+
+function rotate(game) {
+	var currentPuzzle = game.currentPuzzle;
+	var puzzle = createEmptyArray(currentPuzzle.length, currentPuzzle[0].length);
+	for (var y = 0; y < currentPuzzle.length; y++) {
+		for (var x = 0; x < currentPuzzle[y].length; x++) {
+			if (currentPuzzle[y][x]) {
+				var newY = puzzle.length - 1 - x;
+				var newX = y;
+				var el = currentPuzzle[y][x];
+				var moveY = newY - y;
+				var moveX = newX - x;
+				el.style.left = parseFloat(el.style.left)
+						+ (moveX * blockWidth) + '%';
+				el.style.top = parseFloat(el.style.top) + (moveY * blockHeight)
+						+ "%";
+				puzzle[newY][newX] = el;
+			}
+		}
+	}
+	game.currentPuzzle = puzzle;
 }
