@@ -5,8 +5,7 @@ var puzzles = [ [ [ 0, 0, 1 ], [ 1, 1, 1 ], [ 0, 0, 0 ] ],
 		[ [ 1, 0, 0 ], [ 1, 1, 1 ], [ 0, 0, 0 ] ],
 		[ [ 0, 1, 1 ], [ 1, 1, 0 ], [ 0, 0, 0 ] ],
 		[ [ 1, 1, 0 ], [ 0, 1, 1 ], [ 0, 0, 0 ] ],
-		[ [ 0, 1, 0 ], [ 1, 1, 1 ], [ 0, 0, 0 ] ], 
-		[ [ 1, 1 ], [ 1, 1 ] ],
+		[ [ 0, 1, 0 ], [ 1, 1, 1 ], [ 0, 0, 0 ] ], [ [ 1, 1 ], [ 1, 1 ] ],
 		[ [ 0, 0, 0, 0 ], [ 1, 1, 1, 1 ], [ 0, 0, 0, 0 ], [ 0, 0, 0, 0 ] ] ];
 
 var curr_state_initial = 1;
@@ -38,7 +37,7 @@ function initPuzzle() {
 		} else if (game.currentState == curr_state_moving) {
 			moveDown(game);
 		}
-	}, 500);
+	}, 200);
 }
 
 function TetrisGame() {
@@ -50,8 +49,8 @@ function TetrisGame() {
 
 function createNewPuzzle(game) {
 
-	// var puzzleType = random(this.puzzles.length);
-	var puzzleType = 6;
+	var puzzleType = random(this.puzzles.length);
+	// var puzzleType = 6;
 	var puzzle = puzzles[puzzleType];
 	var background = colors[random(this.colors.length)];
 
@@ -102,13 +101,13 @@ function moveDown(game) {
 		if (isCurrentObjectIntersecting(currentObject, block, 'down')
 				&& blockTop <= 96) {
 			block.style.top = (blockTop + blockHeight) + '%';
-			removeFullLine();
-
 		} else {
 			game.currentState = curr_state_initial;
 		}
 		updatePuzzleBoard(game, block, i);
 	}
+
+	removeFullLine(game);
 
 }
 
@@ -189,25 +188,51 @@ function mayMoveDown(currentObject) {
 	return true;
 }
 
-function removeFullLine() {
-	var removeLine = false;
+function removeFullLine(game) {
+
+	var lineRemoved = false;
+
 	var parent = document.getElementById('tetris-area');
 	for (var y = filledBlocks.length - 1; y > 0; y--) {
+		var removeLine = false;
+		var count = 0;
 		for (var x = 0; x < filledBlocks.length; x++) {
-			if (filledBlocks[x][y] == 0) {
-				break;
+			if (filledBlocks[x][y]) {
+				count = count + 1;
 			}
-			if (x == filledBlocks.length - 1)
+			if (count == filledBlocks.length)
 				removeLine = true;
 		}
 		if (removeLine) {
 			for (var x = 0; x < filledBlocks.length; x++) {
 				var block = filledBlocks[x][y];
 				parent.removeChild(block);
-				filledBlocks[x][y] == 0;
+				filledBlocks[x][y] = 0;
+				lineRemoved = true;
 			}
 		}
 	}
+	if (lineRemoved) {
+		for (var y = filledBlocks.length - 1; y > 0; y--) {
+			for (var x = 0; x < filledBlocks.length; x++) {
+				var el = filledBlocks[x][y];
+				if (el !== 0) {
+					el.style.top = parseFloat(el.style.top) + blockHeight + '%';
+					filledBlocks[x][y] = 0;
+
+					var blockLeft = parseFloat(el.style.left);
+					var blockTop = parseFloat(el.style.top);
+
+					var i = blockLeft / 4;
+					var j = blockTop / 4;
+
+					filledBlocks[i][j] = block;
+
+				}
+			}
+		}
+	}
+
 }
 
 function updatePuzzleBoard(game, block, i) {
