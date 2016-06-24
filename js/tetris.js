@@ -37,7 +37,7 @@ function initPuzzle() {
 		} else if (game.currentState == curr_state_moving) {
 			moveDown(game);
 		}
-	}, 200);
+	}, 300);
 }
 
 function TetrisGame() {
@@ -50,7 +50,7 @@ function TetrisGame() {
 function createNewPuzzle(game) {
 
 	var puzzleType = random(this.puzzles.length);
-	// var puzzleType = 6;
+	//var puzzleType = 1;
 	var puzzle = puzzles[puzzleType];
 	var background = colors[random(this.colors.length)];
 
@@ -197,7 +197,7 @@ function removeFullLine(game) {
 		var removeLine = false;
 		var count = 0;
 		for (var x = 0; x < filledBlocks.length; x++) {
-			if (filledBlocks[x][y]) {
+			if (filledBlocks[x][y] != 0) {
 				count = count + 1;
 			}
 			if (count == filledBlocks.length)
@@ -227,7 +227,6 @@ function removeFullLine(game) {
 					var j = blockTop / 4;
 
 					filledBlocks[i][j] = block;
-
 				}
 			}
 		}
@@ -317,6 +316,7 @@ function moveLeft(game) {
 function rotate(game) {
 	var currentPuzzle = game.currentPuzzle;
 	var puzzle = createEmptyArray(currentPuzzle.length, currentPuzzle[0].length);
+	var elements = [];
 	for (var y = 0; y < currentPuzzle.length; y++) {
 		for (var x = 0; x < currentPuzzle[y].length; x++) {
 			if (currentPuzzle[y][x]) {
@@ -330,8 +330,23 @@ function rotate(game) {
 				el.style.top = parseFloat(el.style.top) + (moveY * blockHeight)
 						+ "%";
 				puzzle[newY][newX] = el;
+				elements.push(el);
 			}
 		}
 	}
+	elements = sortElements(elements);
+	game.currentObject = elements;
 	game.currentPuzzle = puzzle;
+
+	var copyArray = game.previousPositions.slice();
+	for (var i = 0; i < elements.length; i++) {
+		for (var j = 0; j < copyArray.length; j++) {
+			if (copyArray[j][0] === elements[i])
+				game.previousPositions[i] = copyArray[j];
+		}
+	}
+
+	for (var i = 0; i < elements.length; i++) {
+		updatePuzzleBoard(game, elements[i], i);
+	}
 }
