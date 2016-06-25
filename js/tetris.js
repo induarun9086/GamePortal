@@ -50,7 +50,7 @@ function TetrisGame() {
 function createNewPuzzle(game) {
 
 	var puzzleType = random(this.puzzles.length);
-	//var puzzleType = 1;
+	// var puzzleType = 1;
 	var puzzle = puzzles[puzzleType];
 	var background = colors[random(this.colors.length)];
 
@@ -216,17 +216,24 @@ function removeFullLine(game) {
 		for (var y = filledBlocks.length - 1; y > 0; y--) {
 			for (var x = 0; x < filledBlocks.length; x++) {
 				var el = filledBlocks[x][y];
+
 				if (el !== 0) {
-					el.style.top = parseFloat(el.style.top) + blockHeight + '%';
-					filledBlocks[x][y] = 0;
-
-					var blockLeft = parseFloat(el.style.left);
 					var blockTop = parseFloat(el.style.top);
+					if (blockTop < 96) {
 
-					var i = blockLeft / 4;
-					var j = blockTop / 4;
+						el.style.top = parseFloat(el.style.top) + blockHeight
+								+ '%';
+						filledBlocks[x][y] = 0;
 
-					filledBlocks[i][j] = block;
+						var blockLeft = parseFloat(el.style.left);
+
+						var i = blockLeft / 4;
+						var j = blockTop / 4;
+
+						filledBlocks[i][j] = block;
+
+					}
+
 				}
 			}
 		}
